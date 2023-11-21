@@ -5,37 +5,37 @@ from numpy.random import choice, uniform, normal, randint
 
 
 # ----------------------------------------------
-#                PARTIKEL FILTER
+#                PARTICLE FILTER
 # ----------------------------------------------
 
-class PartikelFilter:
+class ParticleFilter:
 
-    def __init__(self, numOfPartikels=NUM_OF_PARTIKELS, resampleFreq=RESAMPLE_FREQ):
-        self.numOfP = numOfPartikels
+    def __init__(self, nParticles=NUM_OF_PARTIKELS, resampleFreq=RESAMPLE_FREQ):
+        self.numOfP = nParticles
         self.resFreq = resampleFreq
-        self.partikels = np.zeros(self.numOfP, dtype=np.object)
+        self.particles = np.zeros(self.numOfP, dtype=object)
         for i in range(self.numOfP):
-            self.partikels[i] = Partikel()
-        self.weights = INIT_PARTIKEL_WEIGHT * np.ones(self.numOfP)  # weights of partikel
+            self.particles[i] = Partikel()
+        self.weights = INIT_PARTIKEL_WEIGHT * np.ones(self.numOfP)  # weights of particle
 
-        self.partikelPlot = None
+        self.particlePlot = None
         self.bestPlot = None
         self.weightPlot = None
         self.averagePlot = None
 
-    # UPDATING PARTIKELS AND WEIGHTS
+    # UPDATING PARTICLES AND WEIGHTS
     def moveAll(self, motorSignals):
-        # moving all partikel with given MotorSignals
+        # moving all particle with given MotorSignals
         # give a PREDICTION
         mL, mR = motorSignals
-        for p in self.partikels:
+        for p in self.particles:
             p.moveBy(mL, mR)
 
     def measureAll(self, dist):
-        # updates weight and confidence of all partikels,
+        # updates weight and confidence of all particles,
         # according to how well dist fits their own measured dist
         # applies a CORRECTION
-        for i, p in enumerate(self.partikels):
+        for i, p in enumerate(self.particles):
             conf = p.confidence(dist)
             if p.isInWall():
                 self.weights[i] = 0.0
@@ -44,9 +44,9 @@ class PartikelFilter:
 
     # EVALUATION AND RESAMPLING
     def resampleAll(self):
-        for p in self.partikels:
+        for p in self.particles:
             p.resampleToRandom()
-        self.weights = INIT_PARTIKEL_WEIGHT * np.ones(self.numOfP)  # weights of partikel
+        self.weights = INIT_PARTIKEL_WEIGHT * np.ones(self.numOfP)  # weights of particle
 
     def indexOfBest(self):
         return np.argmax(self.weights)
@@ -54,28 +54,28 @@ class PartikelFilter:
     def indexOfWorst(self):
         return np.argmin(self.weights)
 
-    # ROULETT WHEEL SAMPLING
+    # ROULETTE WHEEL SAMPLING
     def rws(self):
-        newPartikels = np.zeros(self.numOfP, dtype=np.object)
+        newParticles = np.zeros(self.numOfP, dtype=np.object)
         sumOfWeights = np.sum(self.weights)
 
         for i in range(self.numOfP):
-            newPartikels[i] = Partikel()  # neuen Partikel initialisieren
+            newParticles[i] = Partikel()  # initialise a new particle
 
-            roulett = uniform(high=sumOfWeights)
+            roulette = uniform(high=sumOfWeights)
             currW = 0
             for j, w in enumerate(self.weights):
                 currW += w
-                if currW > roulett:
-                    newPartikels[i].resampleTo(self.partikels[j])
+                if currW > roulette:
+                    newParticles[i].resampleTo(self.particles[j])
                     break
 
-        self.partikels = newPartikels
-        self.weights = np.average(self.weights) * np.ones(self.numOfP)  # weights of partikel
+        self.particles = newParticles
+        self.weights = np.average(self.weights) * np.ones(self.numOfP)  # weights of particle
 
     # STOCHASTIC UNIVERSAL SAMPLING
     def sus(self):
-        newPartikels = np.zeros(self.numOfP, dtype=np.object)
+        newParticles = np.zeros(self.numOfP, dtype=np.object)
         sumOfWeights = np.sum(self.weights)
         stocStep = sumOfWeights / self.numOfP
         if stocStep < 1E-5:
@@ -87,18 +87,18 @@ class PartikelFilter:
             currI = 0
             currW = self.weights[currI]
             for i, arrow in enumerate(stochasticArrows):
-                newPartikels[i] = Partikel()
+                newParticles[i] = Partikel()
                 while currW < arrow:
                     currI += 1
                     currW += self.weights[currI]
-                newPartikels[i].resampleTo(self.partikels[currI])
+                newParticles[i].resampleTo(self.particles[currI])
 
-            self.partikels = newPartikels
+            self.particles = newParticles
             self.weights = np.average(self.weights) * np.ones(self.numOfP)
 
     def rga(self):
         REC = 0.5  # recombination
-        MUT = 0.5  # mutaion
+        MUT = 0.5  # mutation
 
         avg = np.average(self.weights)
 
@@ -106,8 +106,8 @@ class PartikelFilter:
             winIdx = randint(self.numOfP)
             losIdx = self.indexOfWorst()
 
-            winner = self.partikels[winIdx]
-            loser = self.partikels[losIdx]
+            winner = self.particles[winIdx]
+            loser = self.particles[losIdx]
 
             if uniform() <= REC:
                 loser.x = winner.x
@@ -127,21 +127,22 @@ class PartikelFilter:
     # HENRIK AND VINCENTS APPROACH
     def hva(self):
         bestI = self.indexOfBest()
-        bestW, bestP = self.weights[bestI], self.partikels[bestI]
+        bestW, bestP = self.weights[bestI], self.particles[bestI]
 
         averageWeight = np.average(self.weights)
 
         for i in range(self.resFreq):
-            worstI = self.indexOfWorst()  # finde den schlechtesten Partikel
-            worstP = self.partikels[worstI]
-            self.weights[worstI] = averageWeight  # gib partikel noch eine chance, gewischt wird average
+            worstI = self.indexOfWorst()  # find the worst particle
+            worstP = self.particles[worstI]
+            # give the particle another chance, by setting it to the current average weight
+            self.weights[worstI] = averageWeight
 
             # resampling state machine
             if bestW > GOOD_THEORY_THRESH and choice([True, False]):
-                # GOOD -> moves partikels closer
+                # GOOD -> moves particles closer
                 worstP.resampleTo(bestP)
             else:
-                # BAD -> scatters partikels to random locations
+                # BAD -> scatters particles to random locations
                 worstP.resampleToRandom()
 
     def autoResample(self, loopCounter, resampleMethod=RESAMPLE_METHOD):
@@ -157,16 +158,16 @@ class PartikelFilter:
 
     # PLOTTING
     def allCoords(self):
-        # returns x and y's of all Partikel for plotting
+        # returns x and y's of all particles for plotting
         pos = np.zeros((self.numOfP, 2))
-        for i, p in enumerate(self.partikels):
+        for i, p in enumerate(self.particles):
             pos[i, :] = p.coords()
         return pos
 
     def initPlot(self):
         pfCoords = self.allCoords()
-        bestCoords = self.partikels[self.indexOfBest()].coords()
-        self.partikelPlot = plt.scatter(pfCoords[:, 0], pfCoords[:, 1], s=self.weights)
+        bestCoords = self.particles[self.indexOfBest()].coords()
+        self.particlePlot = plt.scatter(pfCoords[:, 0], pfCoords[:, 1], s=self.weights)
         self.bestPlot, = plt.plot(bestCoords[0], bestCoords[1], 'r*')
 
     def initWeightPlot(self):
@@ -179,9 +180,9 @@ class PartikelFilter:
     def updatePlot(self):
         pfSizes = self.weights * PARTIKEL_SIZE_FAK
         pfCoords = self.allCoords()
-        bestCoords = self.partikels[self.indexOfBest()].coords()
-        self.partikelPlot.set_offsets(np.c_[pfCoords[:, 0], pfCoords[:, 1]])
-        self.partikelPlot.set_sizes(pfSizes)
+        bestCoords = self.particles[self.indexOfBest()].coords()
+        self.particlePlot.set_offsets(np.c_[pfCoords[:, 0], pfCoords[:, 1]])
+        self.particlePlot.set_sizes(pfSizes)
         self.bestPlot.set_data(bestCoords[0], bestCoords[1])
         if self.weightPlot is not None:
             self.weightPlot.set_ydata(self.weights)

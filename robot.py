@@ -1,6 +1,7 @@
 # -----------------------------------------------
 #                     ROBOT
 # -----------------------------------------------
+import numpy as np
 
 from numpy import sin, cos, tanh, pi, arctanh
 from numpy.random import normal
@@ -14,7 +15,7 @@ motorNoise = lambda: normal(loc=0.0, scale=MOTOR_NOISE_FAK)  # zufalls normalver
 sensorNoise = lambda: normal(loc=0.0, scale=SENSOR_NOISE_FAK)  # zufalls normalverteilung
 
 
-class Robot(np.object):
+class Robot(object):
 
     def __init__(self, startPos=None):
         if startPos is None:

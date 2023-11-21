@@ -1,8 +1,8 @@
 from matplotlib.animation import FuncAnimation
+
 from grid import *
-from partikelfilter import PartikelFilter
+from particlefilter import ParticleFilter
 from robot import Robot
-from time import perf_counter as currentTime
 
 # ----------------------------------------------
 #                MAIN SKRIPT
@@ -24,7 +24,7 @@ if __name__ == '__main__':
     plt.ylim([HEIGHT, 0])
     plt.title("rws")
     robiPlot1 = robbi.initSelfPlot()
-    pf1 = PartikelFilter()
+    pf1 = ParticleFilter()
     pf1.initPlot()
 
     # 2. subplot
@@ -34,7 +34,7 @@ if __name__ == '__main__':
     plt.ylim([HEIGHT, 0])
     plt.title("sus")
     robiPlot2 = robbi.initSelfPlot()
-    pf2 = PartikelFilter()
+    pf2 = ParticleFilter()
     pf2.initPlot()
 
     # 3. subplot
@@ -44,7 +44,7 @@ if __name__ == '__main__':
     plt.ylim([HEIGHT, 0])
     plt.title("rga")
     robiPlot3 = robbi.initSelfPlot()
-    pf3 = PartikelFilter()
+    pf3 = ParticleFilter()
     pf3.initPlot()
 
     # 4. subplot
@@ -54,7 +54,7 @@ if __name__ == '__main__':
     plt.ylim([HEIGHT, 0])
     plt.title("hva")
     robiPlot4 = robbi.initSelfPlot()
-    pf4 = PartikelFilter()
+    pf4 = ParticleFilter()
     pf4.initPlot()
 
 

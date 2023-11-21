@@ -12,12 +12,12 @@ import matplotlib.pyplot as plt
 
 
 # Grid World params
-WORLD_NAME = "labyrinth"
+WORLD_NAME = "simon"
 WORLD_SIZE = 200  # points (height of gridMap)
 WORLD_PATH = Path(".") / "worlds"  # path of folder containing example world files
 TIME_STEP = 10  # ms, delay between frames (matplotlib animation)
 WALL_THRESH = 0.3  # minimal pixel value that counts as wall
-AVG_W_QUITTHRESH = 0.9 # triggeres das auto kidnapp
+AVG_W_QUIT_THRESH = 0.95 # triggers das auto kidnap
 
 # Robot Params
 ROBOT_SIZE = 4.  # points, length back to front, height of plotted triangle

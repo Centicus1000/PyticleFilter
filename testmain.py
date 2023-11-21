@@ -1,5 +1,5 @@
 from grid import *
-from partikelfilter import PartikelFilter
+from particlefilter import ParticleFilter
 from robot import Robot
 from time import perf_counter as currentTime
 
@@ -27,7 +27,7 @@ if __name__ == '__main__':
             robbi.initSelfPlot()
 
             # Partikel filter erstellen
-            pf = PartikelFilter(NUM_OF_PARTIKELS, resampleFreq)
+            pf = ParticleFilter(NUM_OF_PARTIKELS, resampleFreq)
             pf.initPlot()
 
             # main loop

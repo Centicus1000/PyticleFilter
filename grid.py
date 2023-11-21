@@ -9,7 +9,7 @@ from numpy import pi
 
 # convert character into a grayscale value
 charToValueDict = {'#': 1,
-                   '*': 1,
+                   '*': .5,
                    '.': 0,
                    ' ': 0}
 
@@ -33,7 +33,7 @@ def loadGridFromFile(WorldName):
 def loadWorld(worldName, size):
     originalGrid = loadGridFromFile(worldName)  # load world
     zoomFaktor = size / originalGrid.shape[0]
-    zoomedGrid = zoom(originalGrid, zoomFaktor).astype(np.float)  # zoom world to size
+    zoomedGrid = zoom(originalGrid, zoomFaktor).astype(float)  # zoom world to size
     return gaussian_filter(zoomedGrid, sigma=3)  # run gauss filter to blur edges
 
 

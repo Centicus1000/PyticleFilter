@@ -1,6 +1,6 @@
 from matplotlib.animation import FuncAnimation
 from grid import *
-from partikelfilter import PartikelFilter
+from particlefilter import ParticleFilter
 from robot import Robot
 from time import perf_counter as currentTime
 
@@ -19,7 +19,6 @@ from time import perf_counter as currentTime
 # ----------------------------------------------
 
 if __name__ == '__main__':
-    # selfPlot erstellen
     loopCounter = 0
     fig, ax = plt.subplots(nrows=1, ncols=2, figsize=(10, 6),
                            gridspec_kw={
@@ -28,22 +27,23 @@ if __name__ == '__main__':
                                'wspace': 0.4,
                                'hspace': 0.4})
 
-    # welt plotten
+    # plot the world
     plt.subplot(121)
     plt.imshow(GRID, cmap="Greys")
     plt.xlim([0, WIDTH])
     plt.ylim([HEIGHT, 0])
 
-    # echten roboter erstellen
+    # initialise simulation of the real robot
     robbi = Robot()
     robbi.initSelfPlot()
 
-    # Partikel filter erstellen
-    pf = PartikelFilter()
+    # initialise the particle filter
+    pf = ParticleFilter()
     pf.initPlot()
 
     plt.subplot(122)
     pf.initWeightPlot()
+
 
     def mainLoop(i):
         global loopCounter, avgRuntime, maxRuntime
@@ -61,9 +61,8 @@ if __name__ == '__main__':
 
         pf.autoResample(loopCounter)
 
-        if np.average(pf.weights) > AVG_W_QUITTHRESH:
+        if np.average(pf.weights) > AVG_W_QUIT_THRESH:
             robbi.moveTo(randomPosition())
-
 
 
     ani = FuncAnimation(fig, mainLoop, interval=TIME_STEP, repeat=True)
